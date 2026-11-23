@@ -27,7 +27,7 @@ result = "Implementation and configuration described in this section"
 [[area.evidence]]
 kind = "source"
 reference = ".github/workflows/package.yml"
-result = "The package workflow validates the configured Aston ZAP image size and SHA-256 before building the kernel."
+result = "The package workflow validates the configured Aston ZAP image size and SHA-256 and the nonzero 64-bit hexadecimal platform seed before building the kernel. Build 45148681056 completed prelink but stopped while converting the platform seed during ADT generation."
 
 
 [[area.evidence]]
