@@ -25,7 +25,7 @@ payload on a `macos-26` runner. A Linux host runs the board checks below.
 | Touch | Synaptics S3910 (TouchComm, from the OnePlus 13T port) on QUP1 SE4 SPI: `package/TouchProbe.cpp`, `S3910.c`, `TouchBoard.h`. Reset GPIO24, ATTN GPIO25, AVDD GPIO10, VDD ldob4 through RPMh. |
 | Keys | Volume up/down swapped against sheng (`package/ButtonProbe.cpp`, `sheng-buttons-swap=0` restores). |
 | Battery | `sheng-battery=2`: the pack's TI bq28z610 fuel gauge (2S, I2C 0x55 on QUP2 SE0 `i2c@880000`, gpio0/1) read directly, without the audio DSP (`package/AstonGaugeBus.c`, `AstonGauge.c`, `ShengBattery.cpp`). Read only; capacities are reported for both cells, the voltage for one. |
-| GPU | The ZAP shader is the phone's own (`scripts/pull-aston-gpu-firmware.sh`, pin in `scripts/data/aston-gpu-inputs.json`); without it the kernel carries an empty ZAP image and the GPU stops at its ZAP step. GMU and SQE images are the reference ones. |
+| GPU | The ZAP shader comes from the phone (`scripts/pull-aston-gpu-firmware.sh`). The build validates it against `scripts/data/aston-gpu-inputs.json`. GMU and SQE images are the reference ones. |
 | Firmware | Mu-Silicium `aston`, built and packed by the sibling `Ace3-UniXNU` repository; `[firmware]` here is unused. |
 
 Not ported yet: DCS brightness through DSI0 (the panel stays at the boot loader's level), the audio DSP and its users
@@ -47,8 +47,8 @@ and arm64 kernel interfaces these sources use.
 
 ## Build on macOS
 
-1. Push this repository to GitHub and add the secret `UNIXNU_UNIQUE_CHIP_ID` (the platform seed). Optionally add
-   `ASTON_A740_ZAP_B64`, the base64 of the phone's ZAP image, after filling its pin.
+1. Push this repository to GitHub and add the secret `UNIXNU_UNIQUE_CHIP_ID` (the platform seed). For a board with a ZAP
+   pin, add `ASTON_A740_ZAP_B64` with the matching ZAP image encoded as single-line base64.
 2. Run the `package` workflow with `init_data` for a first installation. Its artifacts are `kernel.macho`, `payload.img`,
    `payload.json` and the installation seed.
 
