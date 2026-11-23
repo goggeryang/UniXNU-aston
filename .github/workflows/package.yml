@@ -7,8 +7,8 @@ name: package
 #
 # The platform seed comes from the repository secret UNIXNU_UNIQUE_CHIP_ID and is baked into the payload, so the run's artifacts belong
 # to one device alone: download them, then delete the run. The Ace 3's own Adreno ZAP image (scripts/pull-aston-gpu-firmware.sh) may be
-# given as the base64 secret ASTON_A740_ZAP_B64; it must match the pin in scripts/data/aston-gpu-inputs.json. Without it the kernel
-# carries an empty ZAP image and the GPU stays off.
+# supplied as the base64 secret ASTON_A740_ZAP_B64 when the board has a ZAP pin.
+# It must match scripts/data/aston-gpu-inputs.json.
 
 on:
   workflow_dispatch:
@@ -157,12 +157,28 @@ jobs:
         env:
           zap: ${{ secrets.ASTON_A740_ZAP_B64 }}
         run: |
-          if [ -n "$zap" ]; then
-            mkdir -p UniXNU-aston/.cache/firmware/aston-gpu/qcom/sm8550/aston
-            printf '%s' "$zap" | base64 -d > UniXNU-aston/.cache/firmware/aston-gpu/qcom/sm8550/aston/a740_zap.mbn
-          else
-            echo "::warning::no ASTON_A740_ZAP_B64: the kernel carries an empty ZAP image and the GPU stays off"
-          fi
+          python3 - <<'PY'
+          import base64, binascii, hashlib, json, os
+          from pathlib import Path
+
+          board = Path('UniXNU-aston')
+          key = 'qcom/sm8550/aston/a740_zap.mbn'
+          pin = json.loads((board / 'scripts/data/aston-gpu-inputs.json').read_text())['firmware']['files'][key]
+          if not pin['sha256']:
+              print('::warning::no Aston ZAP pin: the kernel carries an empty ZAP image')
+              raise SystemExit(0)
+          if not os.environ.get('zap'):
+              raise SystemExit('::error::set ASTON_A740_ZAP_B64 to the pinned Ace 3 ZAP image')
+          try:
+              data = base64.b64decode(os.environ['zap'].strip(), validate=True)
+          except (ValueError, binascii.Error):
+              raise SystemExit('::error::ASTON_A740_ZAP_B64 must be single-line base64')
+          if len(data) != pin['bytes'] or hashlib.sha256(data).hexdigest() != pin['sha256']:
+              raise SystemExit('::error::ASTON_A740_ZAP_B64 does not match scripts/data/aston-gpu-inputs.json')
+          output = board / '.cache/firmware/aston-gpu' / key
+          output.parent.mkdir(parents=True, exist_ok=True)
+          output.write_bytes(data)
+          PY
       - name: seed cache identity
         id: seed-key
         env:

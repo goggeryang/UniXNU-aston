@@ -4,8 +4,8 @@
     "files": {
       "qcom/sm8550/aston/a740_zap.mbn": {
         "bytes": 12088,
-        "sha256": "39dad2d75b234c2664a3d8435d32debc50c933825056e6badf40eb409e8a8bbb",
-        "source": "PJE110 ColorOS 15.0.0.870(CN01) vendor_b /firmware/a740_zap.mbn (read from the erofs image dumped in TWRP, 2026-11-08); its three segments equal a740_zap.mdt + .b00-.b02 joined (they differ only in padding)"
+        "sha256": "a33523fb0e59dd8ae6d37ad504ae2d676df2dc613fd2585c2e5a2371eedb1fc9",
+        "source": "PJE110 vendor_a /vendor/firmware/a740_zap.mbn, OnePlus vendor build U.3113a47-dda718-dd6bdf (read over ADB)"
       }
     }
   }
