@@ -421,7 +421,7 @@ result = "Reference sheng observation, not aston verification: 05ac:12ab at Devi
 id = "network"
 status = "planned"
 components = ["Ath12kWifi"]
-paths = ["drivers/Ath12kWifi", "package/*Wifi*", "package/MhiBoot*", "scripts/*wifi*", "scripts/*mhi*", "firmware/wcn7850/**", "dts/sheng.dts", "package/WifiFirmware.c", "scripts/make-aston-wifi-object.py", "scripts/data/aston-wifi-inputs.json", "dts/aston.dts"]
+paths = ["drivers/Ath12kWifi", "package/*Wifi*", "package/MhiBoot*", "scripts/*wifi*", "scripts/*mhi*", "scripts/prefetch-ath12k-sources.py", "firmware/wcn7850/**", "dts/sheng.dts", "package/WifiFirmware.c", "scripts/make-aston-wifi-object.py", "scripts/data/aston-wifi-inputs.json", "dts/aston.dts"]
 inputs = ["WCN7850 PCIe endpoint, MSI routing, DMA callbacks and hash-pinned amss.bin, m3.bin and board-2.bin."]
 configuration = ["sheng-wifi=5 selects the mainline cfg80211/mac80211/ath12k runtime; wpa_supplicant 2.12 owns userspace authentication.", "WifiProbe supplies power/PCIe/MSI and the 128 MiB DMA window; WifiNet exposes en0/Apple80211. The DTS exports /arm-io/wlan for wifid.", "The signed service runs at /usr/libexec/unixnu-wpa_supplicant. package/WifiFirmware.h defines the shared loader/packer directory /private/var/ngpu/firmware/ath12k/WCN7850/hw2.0/."]
 procedure = ["Run host checks affected by source changes, build the kernel/payload/boot image and verify packed inputs.", "Check scanning, association, DHCP, traffic, cancellation and signal display on the device; measure throughput, jitter and heat."]
@@ -448,6 +448,11 @@ result = "Reference sheng observation, not aston verification: Wi-Fi toggling, S
 kind = "source"
 reference = "scripts/check-wifi-launchd.py"
 result = "The launchd cache fixture checks that the Wi-Fi job and other stock jobs retain their settings when the icon service environment is applied."
+
+[[area.evidence]]
+kind = "source"
+reference = "scripts/prefetch-ath12k-sources.py"
+result = "Ath12kWifi dependency preparation fetches the Linux and FreeBSD commits from the source lock directly. FreeBSD releng/15.1 advanced beyond the locked revision. Sparse checkout and the existing revision and content checks remain in use."
 
 [[area]]
 id = "audio"
