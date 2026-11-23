@@ -4,8 +4,8 @@ runs the module's own fetch for the rest (the supplicant archive).
 
 Ath12kWifi's tools/fetch-sources.py clones them with `git clone --sparse` and then always runs `git sparse-checkout add` with
 root-anchored patterns ("/drivers/net/wireless/ath/"). A git that starts sparse checkouts in cone mode (the macOS runner's)
-refuses those patterns, and the board build stops. Cloned here first, in pattern mode, the same sources pass its revision and
-content checks and its `add`. Existing checkouts are left alone.
+refuses those patterns. Fetch the locked commits directly so moving branches do not change the source.
+The pattern-mode checkouts pass the module's revision and content checks. Existing checkouts are left alone.
 
 usage: prefetch-ath12k-sources.py ATH12K_WIFI_DIR
 """
@@ -30,12 +30,14 @@ def main():
         if directory.exists():
             print(f'ok    {name}: {directory} exists')
             continue
-        git('clone', '--depth', '1', '--branch', source['ref'], '--filter=blob:none', '--no-checkout', source['url'], str(directory))
+        git('init', '-q', str(directory))
+        git('-C', str(directory), 'remote', 'add', 'origin', source['url'])
+        git('-C', str(directory), 'fetch', '--depth', '1', '--filter=blob:none', 'origin', source['commit'])
         git('-C', str(directory), 'sparse-checkout', 'set', '--no-cone', *source['paths'])
-        git('-C', str(directory), 'read-tree', '-mu', 'HEAD')
+        git('-C', str(directory), 'checkout', '--quiet', '--detach', 'FETCH_HEAD')
         head = subprocess.run(['git', '-C', str(directory), 'rev-parse', 'HEAD'], check=True, capture_output=True, text=True).stdout.strip()
         if head != source['commit']:
-            raise SystemExit(f'{name}: {source["ref"]} is {head}, the lock expects {source["commit"]}')
+            raise SystemExit(f'{name}: checked out {head}, the lock expects {source["commit"]}')
         missing = [path for path in source['required'] if not (directory / path).is_file()]
         if missing:
             raise SystemExit(f'{name}: missing after checkout: {", ".join(missing)}')
