@@ -290,7 +290,8 @@ static uint32_t touch_kept,touch_keep;
 static uint32_t vsync_kept,vsync_keep,cpufreq_kept,cpufreq_keep;
 
 static void latency_tick(void) {
-  if (!&native_legacy_swapstat || native_legacy_swapstat[9] < 50) return;   // the home screen draws
+  // The home screen may reach the framebuffer by copying and retiring swaps without direct flips.
+  if (!&native_legacy_swapstat || (native_legacy_swapstat[9] < 50 && native_legacy_swapstat[11] < 50)) return;
   boot_latency_start();
   if (&boot_client_sampler_start) boot_client_sampler_start();
   // Everything below allocates only now, once the home screen draws: nothing of this trace runs during startup.

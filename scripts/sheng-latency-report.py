@@ -26,15 +26,24 @@ def frame_metrics(diag):
     touches = sorted(t for (t,) in struct.iter_unpack('<Q', touch_blob[16:16 + kept * 8]))
     out = {}
 
-    # Frame intervals: display flips (swap ring event 4) with a touch report between them.
-    flips = sorted(int(l.split()[1]) for l in open(files / 'kernel.rings.txt') if l.startswith('S ') and l.split()[2] == '4')
+    # A firmware-framebuffer copy retires its swap without a direct display flip.
+    frame_times = {'4': [], '6': []}
+    with (files / 'kernel.rings.txt').open() as rings:
+        for line in rings:
+            if line.startswith('S '):
+                _, timestamp, event, *_ = line.split()
+                if event in frame_times:
+                    frame_times[event].append(int(timestamp))
+    has_flips = len(frame_times['4']) >= 2
+    out['frame_event'] = 'flip' if has_flips else 'retire'
+    frames = sorted(frame_times['4'] if has_flips else frame_times['6'])
     intervals, continuous, gaps = [], [], 0
-    for a, b in zip(flips, flips[1:]):
+    for a, b in zip(frames, frames[1:]):
         i, j = bisect.bisect_left(touches, a), bisect.bisect_left(touches, b)
         if j > i:
             intervals.append((b - a) / 1000)
             # At 120 Hz, allow up to two scan periods without a report.
-            # Include both flip boundaries so a lone tap after a long idle is excluded.
+            # Include both frame boundaries so a lone tap after a long idle is excluded.
             updates = [a, *touches[i:j], b]
             if all(y - x <= 16700 for x, y in zip(updates, updates[1:])):
                 continuous.append((b - a) / 1000)

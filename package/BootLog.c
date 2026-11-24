@@ -2084,8 +2084,7 @@ void boot_log_tick(unsigned now) {
   compose_spawn = (char *)IOMalloc(16384);
   export_lock = IOLockAlloc();
 #if defined(NATIVE_BOOT_PROCESS_CAPTURE) && NATIVE_BOOT_PROCESS_CAPTURE
-  uint32_t diag = 0;
-  if (PE_parse_boot_argn("sheng-diag", &diag, sizeof diag) && diag == 1) boot_process_start();
+  boot_process_start(); // The worker checks boot-ui-trace independently of the binary export.
 #endif
   thread_t thread;
   if (kernel_thread_start_priority(writer, 0, BASEPRI_KERNEL, &thread) == KERN_SUCCESS) thread_deallocate(thread);

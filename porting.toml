@@ -642,6 +642,16 @@ next_action = ["Read [data mount capacity], [data] and sheng-exit records after 
 
 [[area.evidence]]
 kind = "source"
+reference = "package/BootDiagExport.c"
+result = "The keyboard reproduction captured ten consecutive S3910 contacts while the display submission gaps repeatedly reached 500 ms. The capture now starts after 50 flips or 50 retired swaps, covering the firmware framebuffer copy path. Hardware validation of the revised capture remains pending."
+
+[[area.evidence]]
+kind = "source"
+reference = "package/BootLog.c"
+result = "The source-storage process worker honors the opt-in boot-ui-trace setting in normal text logging. The prior keyboard trace contained empty stacks. The target processes can be selected with boot-ui-focus=InputUI and boot-ui-focus4=textinputd."
+
+[[area.evidence]]
+kind = "source"
 reference = "scripts/read-sheng-log.py"
 result = "Implementation and configuration described in this section"
 
